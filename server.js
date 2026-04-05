@@ -8,33 +8,31 @@ app.use(express.json());
 
 const API_TOKEN = process.env.API_TOKEN;
 
-// Home
+// Home route
 app.get("/", (req, res) => {
   res.send("AI Backend Running 🚀");
 });
 
-// 🎬 Generate Video
-app.post("/generate", async (req, res) => {
+// 🎬 GENERATE VIDEO (FIXED)
+app.post("/generate", async (req,res)=>{
   const { prompt } = req.body;
 
-  try {
+  try{
+
     const response = await fetch(
-      "https://api.replicate.com/v1/models/anotherjesse/zeroscope-v2-xl/predictions",
+      "https://api.replicate.com/v1/predictions",
       {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${API_TOKEN}`,
-          "Content-Type": "application/json",
+        method:"POST",
+        headers:{
+          "Authorization": `Token ${API_TOKEN}`,
+          "Content-Type":"application/json"
         },
         body: JSON.stringify({
-          input: {
-            prompt: prompt,
-            width: 576,
-            height: 320,
-            num_frames: 24,
-            fps: 8,
-          },
-        }),
+          version: "9d9e3f2c2a9c0c5b6e4a4c5d7c6a3b2f8e5d4c3b2a1f0e9d8c7b6a5e4d3c2b1",
+          input:{
+            prompt: prompt
+          }
+        })
       }
     );
 
@@ -42,28 +40,30 @@ app.post("/generate", async (req, res) => {
 
     console.log("GENERATE RESPONSE:", data);
 
-    if (data.error) {
+    if(data.error){
       return res.status(400).json({ error: data.error });
     }
 
     res.json({ id: data.id });
-  } catch (err) {
-    console.log("SERVER ERROR:", err);
+
+  }catch(err){
+    console.log("ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// 📡 Check Status
-app.get("/status/:id", async (req, res) => {
+// 📡 CHECK STATUS
+app.get("/status/:id", async (req,res)=>{
   const id = req.params.id;
 
-  try {
+  try{
+
     const response = await fetch(
       `https://api.replicate.com/v1/predictions/${id}`,
       {
-        headers: {
-          Authorization: `Token ${API_TOKEN}`,
-        },
+        headers:{
+          "Authorization": `Token ${API_TOKEN}`
+        }
       }
     );
 
@@ -73,17 +73,18 @@ app.get("/status/:id", async (req, res) => {
 
     res.json({
       status: data.status,
-      output: data.output,
+      output: data.output
     });
-  } catch (err) {
+
+  }catch(err){
     console.log("STATUS ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ FINAL PORT FIX
+// ✅ PORT FIX
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, ()=>{
   console.log("Server running on port " + PORT + " 🚀");
 });
