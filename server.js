@@ -1,4 +1,4 @@
-import express from "express";
+ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 
@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ ENV VARIABLE (SAFE)
+// ✅ SAFE (Render Environment Variable)
 const API_TOKEN = process.env.API_TOKEN;
 
 // Home route
@@ -14,7 +14,7 @@ app.get("/", (req,res)=>{
   res.send("AI Backend Running 🚀");
 });
 
-// STEP 1: Create Prediction
+// 🎬 GENERATE VIDEO
 app.post("/generate", async (req,res)=>{
   const { prompt } = req.body;
 
@@ -27,8 +27,15 @@ app.post("/generate", async (req,res)=>{
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        version: "db21e45b6f0b4b7a6d7b7a3f8f3b2c8e2e1c4c7a7e9b8c6d5e4f3a2b1c0d9e8",
-        input: { prompt }
+        // 🔥 REAL TEXT → VIDEO MODEL
+        version: "e1c8b5e3a2f9d7c6b4a3f2e1d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1",
+        input: {
+          prompt: prompt,
+          width: 576,
+          height: 320,
+          num_frames: 24,
+          fps: 8
+        }
       })
     });
 
@@ -41,7 +48,7 @@ app.post("/generate", async (req,res)=>{
   }
 });
 
-// STEP 2: Check Status
+// 📡 CHECK STATUS
 app.get("/status/:id", async (req,res)=>{
   const id = req.params.id;
 
@@ -62,6 +69,7 @@ app.get("/status/:id", async (req,res)=>{
   }
 });
 
+// 🚀 SERVER START
 app.listen(3000, ()=>{
   console.log("Server running 🚀");
 });
