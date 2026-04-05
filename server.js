@@ -8,72 +8,82 @@ app.use(express.json());
 
 const API_TOKEN = process.env.API_TOKEN;
 
-app.get("/", (req,res)=>{
+// Home
+app.get("/", (req, res) => {
   res.send("AI Backend Running 🚀");
 });
 
-app.post("/generate", async (req,res)=>{
+// 🎬 Generate Video
+app.post("/generate", async (req, res) => {
   const { prompt } = req.body;
 
-  try{
-
-    const response = await fetch("https://api.replicate.com/v1/models/anotherjesse/zeroscope-v2-xl/predictions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Token ${API_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        input: {
-          prompt: prompt,
-          width: 576,
-          height: 320,
-          num_frames: 24,
-          fps: 8
-        }
-      })
-    });
+  try {
+    const response = await fetch(
+      "https://api.replicate.com/v1/models/anotherjesse/zeroscope-v2-xl/predictions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: {
+            prompt: prompt,
+            width: 576,
+            height: 320,
+            num_frames: 24,
+            fps: 8,
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
 
-    console.log("RESPONSE:", data); // 🔥 debug
+    console.log("GENERATE RESPONSE:", data);
 
-    // ❌ अगर error आया तो frontend को भेज
-    if(data.error){
+    if (data.error) {
       return res.status(400).json({ error: data.error });
     }
 
-    res.json(data);
-
-  }catch(err){
-    console.log("SERVER ERROR:", err); // 🔥 debug
+    res.json({ id: data.id });
+  } catch (err) {
+    console.log("SERVER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get("/status/:id", async (req,res)=>{
+// 📡 Check Status
+app.get("/status/:id", async (req, res) => {
   const id = req.params.id;
 
-  try{
-
-    const response = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
-      headers: {
-        "Authorization": `Token ${API_TOKEN}`
+  try {
+    const response = await fetch(
+      `https://api.replicate.com/v1/predictions/${id}`,
+      {
+        headers: {
+          Authorization: `Token ${API_TOKEN}`,
+        },
       }
-    });
+    );
 
     const data = await response.json();
 
-    console.log("STATUS:", data); // 🔥 debug
+    console.log("STATUS RESPONSE:", data);
 
-    res.json(data);
-
-  }catch(err){
+    res.json({
+      status: data.status,
+      output: data.output,
+    });
+  } catch (err) {
     console.log("STATUS ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3000, ()=>{
-  console.log("Server running 🚀");
+// ✅ FINAL PORT FIX
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT + " 🚀");
 });
